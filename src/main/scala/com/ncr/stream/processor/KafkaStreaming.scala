@@ -3,11 +3,13 @@ package com.ncr.stream.processor
 import com.ncr.stream.errors._
 import java.time.Duration
 import java.util.Properties
+
 import org.apache.kafka.streams.scala.StreamsBuilder
 import org.apache.kafka.streams.{KafkaStreams, StreamsConfig}
 import org.apache.kafka.streams.scala.Serdes._
 import org.apache.kafka.streams.scala.ImplicitConversions._
 import net.liftweb.json._
+import org.apache.kafka.streams.kstream.KStream
 
 abstract class KafkaStreaming {
 
@@ -27,7 +29,8 @@ abstract class KafkaStreaming {
 
     val builder = new StreamsBuilder()
     val from = builder.stream[String, String]("kafka-streams-input")
-    val process = from.flatMapValues(textLine => businessLogicProcessor(textLine))
+    //val process = from.flatMapValues(textLine => businessLogicProcessor(textLine))
+    val process = businessLogicProcessor(from.asInstanceOf[org.apache.kafka.streams.scala.kstream.KStream[String, String]])
     process.to("kafka-streams-output")
 
     val topology = builder.build(config)
@@ -43,5 +46,5 @@ abstract class KafkaStreaming {
     process
   }
 
-  def businessLogicProcessor(msg: String): Array[String]
+  def businessLogicProcessor(stream: org.apache.kafka.streams.scala.kstream.KStream[String, String]): org.apache.kafka.streams.scala.kstream.KStream[String, String]
 }
