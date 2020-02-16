@@ -12,7 +12,9 @@ object KafkaStreamingTest extends App {
       val JObject(body) = (raw \\ "Body")
       val JArray(a) = body(0).value
       ((a map (_ merge metadata)) map (JsonAST.compactRender(_).replace("header", "metadata"))).toArray.mkString("\n").split("\\n")
-
     }
   }
+
+  val pro = ks.init
+//  pro.flatMapValues(each => each.toUpperCase)
 }
