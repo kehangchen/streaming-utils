@@ -1,6 +1,7 @@
 package com.ncr.stream.config
 
 import java.io.File
+import java.util.Properties
 
 import com.typesafe.config.{Config, ConfigFactory}
 
@@ -46,7 +47,7 @@ class NCRConfig(fileNameOption: Option[String] = None) {
    * @return - a string
    */
   def getString(path: String): String = {
-    config.getConfig(path).toString
+    config.getString(path)
   }
 
   /**
@@ -59,13 +60,12 @@ class NCRConfig(fileNameOption: Option[String] = None) {
   def getProperties(path: String): java.util.Properties = {
     import scala.collection.JavaConversions._
 
-    val props: java.util.Properties = new java.util.Properties()
+    val properties: java.util.Properties = new java.util.Properties()
 
-    val map: Map[String, Object] = config.getConfig(path).entrySet().map({ entry =>
-      entry.getKey -> entry.getValue.unwrapped()
-    })(collection.breakOut)
+    config.getConfig(path).entrySet().map({ entry =>
+        properties.setProperty(entry.getKey, entry.getValue.unwrapped().toString)
+    })
 
-//    props.putAll(map)
-    props
+    properties
   }
 }
