@@ -14,31 +14,20 @@ import org.apache.kafka.streams.kstream.KStream
 
 abstract class KafkaStreaming {
 
-  def init = {
-    val configFile = "/Volumes/Macintosh HD2/Users/kehangchen/Documents/mes/scala/streaming-utils/application.conf"
-    val conf = new NCRConfig(Option(configFile))
+  def init(path: String) = {
+    val conf = new NCRConfig(Option(path))
     val input_topic = conf.getString("ncr-config.kafka.streaming.input.topic")
     val output_topic = conf.getString("ncr-config.kafka.streaming.output.topic")
     val config = conf.getProperties("ncr-config.kafka.streaming")
-
-//    val config: Properties = {
-//      val p = new Properties()
-//      // this parameter must be unique within a Kafka cluster
-//      p.put(StreamsConfig.APPLICATION_ID_CONFIG, "kafka-stream-application")
-//      val bootstrapServers = "localhost:9092"
-//      p.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers)
-//      p.put(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, classOf[NCRDeserializationExceptionHandler].getName)
-//      p.put(StreamsConfig.DEFAULT_PRODUCTION_EXCEPTION_HANDLER_CLASS_CONFIG, classOf[NCRProductionExceptionHandler].getName)
-//      p.put(StreamsConfig.RECONNECT_BACKOFF_MS_CONFIG, 1000)
-//      p.put(StreamsConfig.RECONNECT_BACKOFF_MAX_MS_CONFIG, 10000)
-//      p
-//    }
-
     val builder = new StreamsBuilder()
     val from = builder.stream[String, String](input_topic)
-    //val process = from.flatMapValues(textLine => businessLogicProcessor(textLine))
+
     val process = businessLogicProcessor(from.asInstanceOf[org.apache.kafka.streams.scala.kstream.KStream[String, String]])
+    //val aggregation = aggregationProcessor(process)
     process.to(output_topic)
+
+    // perform required aggregation here and then push the result to Operation topic
+    //aggregationProcessor(process).to("Operation-topic")
 
     val topology = builder.build(config)
     System.out.println(topology.describe())
@@ -54,4 +43,9 @@ abstract class KafkaStreaming {
   }
 
   def businessLogicProcessor(stream: org.apache.kafka.streams.scala.kstream.KStream[String, String]): org.apache.kafka.streams.scala.kstream.KStream[String, String]
+
+//  def aggregationProcessor(value: org.apache.kafka.streams.scala.kstream.KStream[String, String]): org.apache.kafka.streams.kstream.KStream[String, java.lang.Long] = {
+//    // implement aggregation logic
+//    ???
+//  }
 }

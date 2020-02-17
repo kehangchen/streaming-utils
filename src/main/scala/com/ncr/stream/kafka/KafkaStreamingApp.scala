@@ -1,10 +1,9 @@
 package com.ncr.stream.kafka
 
-import com.ncr.stream.processor._
+import com.ncr.stream.processor.KafkaStreaming
 import net.liftweb.json._
-import org.apache.kafka.streams.kstream.KStream
 
-object KafkaStreamingTest extends App {
+object KafkaStreamingApp extends App {
 
   val ks = new KafkaStreaming {
     override def businessLogicProcessor(msg: org.apache.kafka.streams.scala.kstream.KStream[String, String]): org.apache.kafka.streams.scala.kstream.KStream[String, String] = {
@@ -18,6 +17,5 @@ object KafkaStreamingTest extends App {
     }
   }
 
-  val pro = ks.init
-//  pro.flatMapValues(each => each.toUpperCase)
+  val pro = ks.init("./application.conf")
 }
