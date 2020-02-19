@@ -1,16 +1,12 @@
 package com.ncr.stream.processor
 
-import com.ncr.stream.errors._
 import java.time.Duration
-import java.util.Properties
 
 import com.ncr.stream.config.NCRConfig
 import org.apache.kafka.streams.scala.StreamsBuilder
-import org.apache.kafka.streams.{KafkaStreams, StreamsConfig, Topology}
+import org.apache.kafka.streams.{KafkaStreams, Topology}
 import org.apache.kafka.streams.scala.Serdes._
 import org.apache.kafka.streams.scala.ImplicitConversions._
-import net.liftweb.json._
-import org.apache.kafka.streams.kstream.KStream
 
 abstract class KafkaStreaming(path: String) {
 
@@ -33,7 +29,6 @@ abstract class KafkaStreaming(path: String) {
     // perform required aggregation here and then push the result to Operation topic
     //aggregationProcessor(process).to("Operation-topic")
 
-    //val topology = builder.build(config)
     val topology = builder.build()
     System.out.println(topology.describe())
     topology

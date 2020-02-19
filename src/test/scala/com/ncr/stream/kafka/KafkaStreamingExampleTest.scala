@@ -1,17 +1,17 @@
 package com.ncr.stream.kafka
 
 import org.apache.kafka.common.serialization._
-import org.apache.kafka.streams.{StreamsConfig, TopologyTestDriver}
-import org.scalatest.FunSuite
+import org.apache.kafka.streams.TopologyTestDriver
+import org.scalatest.funsuite.AnyFunSuite
 
-class KafkaStreamingExampleTest extends FunSuite {
+class KafkaStreamingExampleTest extends AnyFunSuite {
 
   test("Test size is 2") {
-    val kafkaStreamingExample = new KafkaStreamingExample("./application.conf")
-    val driver = new TopologyTestDriver(kafkaStreamingExample.init(),
-      kafkaStreamingExample.config.getProperties("ncr-config.kafka.streaming"))
-    val input = kafkaStreamingExample.config.getString("ncr-config.kafka.streaming.input.topic")
-    val output = kafkaStreamingExample.config.getString("ncr-config.kafka.streaming.output.topic")
+    val ks = new KafkaStreamingExample("./application.conf")
+    val driver = new TopologyTestDriver(ks.init(),
+      ks.config.getProperties(ks.StreamingConfigPath))
+    val input = ks.config.getString(ks.InputTopicPath)
+    val output = ks.config.getString(ks.OutputTopicPath)
     val input_topic = driver.createInputTopic(input, new StringSerializer, new StringSerializer)
     val output_topic = driver.createOutputTopic(output, new StringDeserializer, new StringDeserializer)
 
