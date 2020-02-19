@@ -6,19 +6,23 @@ import java.util.Properties
 
 import com.ncr.stream.config.NCRConfig
 import org.apache.kafka.streams.scala.StreamsBuilder
-import org.apache.kafka.streams.{KafkaStreams, StreamsConfig}
+import org.apache.kafka.streams.{KafkaStreams, StreamsConfig, Topology}
 import org.apache.kafka.streams.scala.Serdes._
 import org.apache.kafka.streams.scala.ImplicitConversions._
 import net.liftweb.json._
 import org.apache.kafka.streams.kstream.KStream
 
-abstract class KafkaStreaming {
+abstract class KafkaStreaming(path: String) {
 
-  def init(path: String) = {
-    val conf = new NCRConfig(Option(path))
-    val input_topic = conf.getString("ncr-config.kafka.streaming.input.topic")
-    val output_topic = conf.getString("ncr-config.kafka.streaming.output.topic")
-    val config = conf.getProperties("ncr-config.kafka.streaming")
+  val InputTopicPath = "ncr-config.kafka.streaming.input.topic"
+  val OutputTopicPath = "ncr-config.kafka.streaming.output.topic"
+  val StreamingConfigPath = "ncr-config.kafka.streaming"
+
+  val config = new NCRConfig(Option(path))
+
+  def init() = {
+    val input_topic = config.getString(InputTopicPath)
+    val output_topic = config.getString(OutputTopicPath)
     val builder = new StreamsBuilder()
     val from = builder.stream[String, String](input_topic)
 
@@ -29,9 +33,14 @@ abstract class KafkaStreaming {
     // perform required aggregation here and then push the result to Operation topic
     //aggregationProcessor(process).to("Operation-topic")
 
-    val topology = builder.build(config)
+    //val topology = builder.build(config)
+    val topology = builder.build()
     System.out.println(topology.describe())
-    val streams: KafkaStreams = new KafkaStreams(topology, config)
+    topology
+  }
+
+  def start(topology: Topology) = {
+    val streams: KafkaStreams = new KafkaStreams(topology, config.getProperties(StreamingConfigPath))
     streams.cleanUp()
     streams.start()
 
@@ -39,7 +48,6 @@ abstract class KafkaStreaming {
     sys.ShutdownHookThread {
       streams.close(Duration.ofSeconds(1))
     }
-    process
   }
 
   def businessLogicProcessor(stream: org.apache.kafka.streams.scala.kstream.KStream[String, String]): org.apache.kafka.streams.scala.kstream.KStream[String, String]
